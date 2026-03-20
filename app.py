@@ -8,31 +8,26 @@ from google.genai import types
 # -----------------------------
 st.set_page_config(page_title="Student Help Desk AI", page_icon="🎓")
 
-# 🎨 THEME
+# 🎨 BRAND COLORS
 PRIMARY_PURPLE = "#7B5CFF"
 PINK = "#E85BBE"
-BG = "#F3F4F6"
-TEXT = "#1F2937"
-WHITE = "#FFFFFF"
 LIGHT_PURPLE = "#EDE9FE"
 
 # -----------------------------
-# STYLE
+# STYLE (theme-aware)
 # -----------------------------
 st.markdown(f"""
 <style>
 
 .stApp {{
-    background-color: {BG};
-    color: {TEXT};
+    background-color: var(--background-color);
+    color: var(--text-color);
 }}
 
-/* Chat spacing */
 [data-testid="stChatMessage"] {{
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }}
 
-/* USER bubble */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
     background: linear-gradient(135deg, {PRIMARY_PURPLE}, {PINK});
     color: white;
@@ -41,30 +36,30 @@ st.markdown(f"""
     margin-left: 20%;
 }}
 
-/* BOT bubble */
 [data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {{
-    background: {WHITE};
-    border: 1px solid {LIGHT_PURPLE};
+    background: var(--secondary-background-color);
+    border: 1px solid rgba(120,120,120,0.2);
+    color: var(--text-color);
     padding: 12px;
     border-radius: 14px;
     margin-right: 20%;
 }}
 
-/* Avatar colors */
-[data-testid="chatAvatarIcon-user"] {{
+[data-testid="stChatInput"] > div {{
+    background-color: var(--secondary-background-color) !important;
+    border: 1px solid rgba(120,120,120,0.2) !important;
+    border-radius: 14px !important;
+}}
+
+[data-testid="stChatInput"] > div:focus-within {{
+    border: 1px solid {PRIMARY_PURPLE} !important;
+    box-shadow: 0 0 0 1px {PRIMARY_PURPLE} !important;
+}}
+
+button[kind="secondary"] {{
     background: linear-gradient(135deg, {PRIMARY_PURPLE}, {PINK}) !important;
     color: white !important;
-}}
-
-[data-testid="chatAvatarIcon-assistant"] {{
-    background: {LIGHT_PURPLE} !important;
-    color: {PRIMARY_PURPLE} !important;
-}}
-
-/* Input */
-.stChatInput {{
-    border-radius: 12px !important;
-    border: 1px solid {LIGHT_PURPLE} !important;
+    border-radius: 10px !important;
 }}
 
 </style>
@@ -81,24 +76,41 @@ if GEMINI_API_KEY:
     client = genai.Client(api_key=GEMINI_API_KEY)
 
 # -----------------------------
+# PDF UPLOAD FUNCTION
+# -----------------------------
+def upload_pdf_to_gemini(uploaded_file):
+    if not client or uploaded_file is None:
+        return None
+
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            tmp.write(uploaded_file.read())
+            temp_path = tmp.name
+
+        gemini_file = client.files.upload(file=temp_path)
+        return gemini_file
+
+    except Exception as e:
+        return None
+
+# -----------------------------
 # RESPONSE FUNCTION
 # -----------------------------
 def generate_response(user_message):
     if not client:
         return "⚠️ API key not set."
 
-    prompt = f"""
-You are a helpful student support assistant.
+    uploaded_doc = st.session_state.get("pdf_file")
 
-User: {user_message}
+    contents = [user_message]
 
-Give a clear, friendly, structured answer.
-"""
+    if uploaded_doc:
+        contents = [uploaded_doc, user_message]
 
     try:
         response = client.models.generate_content(
             model=DEFAULT_MODEL,
-            contents=prompt,
+            contents=contents,
             config=types.GenerateContentConfig(temperature=0.7),
         )
         return response.text
@@ -110,6 +122,9 @@ Give a clear, friendly, structured answer.
 # -----------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "pdf_file" not in st.session_state:
+    st.session_state.pdf_file = None
 
 # -----------------------------
 # SIDEBAR
@@ -133,10 +148,21 @@ with st.sidebar:
     uploaded_file = st.file_uploader("📄 Upload PDF", type=["pdf"])
 
     if uploaded_file:
-        st.success("PDF uploaded (basic demo)")
+        if st.button("Use PDF", use_container_width=True):
+            with st.spinner("Uploading PDF..."):
+                gemini_file = upload_pdf_to_gemini(uploaded_file)
+                if gemini_file:
+                    st.session_state.pdf_file = gemini_file
+                    st.success("PDF ready for questions ✅")
+                else:
+                    st.error("Upload failed ❌")
+
+    if st.session_state.pdf_file:
+        st.info("📄 PDF attached")
 
     if st.button("🗑 Clear Chat", use_container_width=True):
         st.session_state.messages = []
+        st.session_state.pdf_file = None
         st.rerun()
 
 # -----------------------------
@@ -153,7 +179,7 @@ st.markdown(f"""
         🎓 Student Help Desk AI
     </h2>
     <p style="color:rgba(255,255,255,0.9); font-size:14px;">
-        Smart chatbot for student support
+        Smart chatbot with PDF support
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -176,37 +202,9 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Typing animation
     with st.chat_message("assistant"):
-
-        st.markdown(f"""
-        <div style="display:flex; gap:5px; padding:10px;">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-        </div>
-
-        <style>
-        .dot {{
-            width:8px;
-            height:8px;
-            background:{PRIMARY_PURPLE};
-            border-radius:50%;
-            animation: blink 1.4s infinite;
-        }}
-
-        .dot:nth-child(2) {{ animation-delay: 0.2s; }}
-        .dot:nth-child(3) {{ animation-delay: 0.4s; }}
-
-        @keyframes blink {{
-            0% {{ opacity:0.2; }}
-            20% {{ opacity:1; }}
-            100% {{ opacity:0.2; }}
-        }}
-        </style>
-        """, unsafe_allow_html=True)
-
-        response = generate_response(prompt)
-        st.markdown(response)
+        with st.spinner("Thinking..."):
+            response = generate_response(prompt)
+            st.markdown(response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
