@@ -100,36 +100,38 @@ def generate_response(user_message):
     if not client:
         return "⚠️ API key not set."
 
-    prompt = f"""
+    # ✅ ADD THIS HERE
+    system_prompt = """
 You are a university student help desk assistant.
 
-Your job is to help students with:
-- exams
-- courses
-- assignments
-- fees
-- university services
+Give:
+- Short answers
+- Clear steps
+- Practical guidance
 
-Rules:
-- Answer clearly and professionally
-- Use bullet points when helpful
-- Keep answers simple and structured
-- If question is unclear, ask a follow-up question
-- Be friendly and helpful
+If question is about exams, courses, or assignments:
+→ Give direct actionable steps
 
-Student question:
-{user_message}
+Do NOT give long explanations.
+"""
+
+    prompt = f"""
+{system_prompt}
+
+User: {user_message}
+
+Answer:
 """
 
     try:
         response = client.models.generate_content(
             model=DEFAULT_MODEL,
             contents=prompt,
-            config=types.GenerateContentConfig(temperature=0.7),
+            config=types.GenerateContentConfig(temperature=0.5),
         )
         return response.text
-    except:
-        return "❌ Error generating response"
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
 
 # -----------------------------
 # SESSION
