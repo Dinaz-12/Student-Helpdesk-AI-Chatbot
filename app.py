@@ -2,6 +2,7 @@ import tempfile
 import streamlit as st
 from google import genai
 from google.genai import types
+import PyPDF2
 
 # -----------------------------
 # CONFIG
@@ -74,6 +75,16 @@ DEFAULT_MODEL = "gemini-2.5-flash"
 client = None
 if GEMINI_API_KEY:
     client = genai.Client(api_key=GEMINI_API_KEY)
+
+# -----------------------------
+def extract_pdf_text(uploaded_file):
+    text = ""
+    reader = PyPDF2.PdfReader(uploaded_file)
+
+    for page in reader.pages:
+        text += page.extract_text() or ""
+
+    return text
 
 # -----------------------------
 # PDF UPLOAD FUNCTION
