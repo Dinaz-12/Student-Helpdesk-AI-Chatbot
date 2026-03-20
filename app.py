@@ -100,17 +100,31 @@ def generate_response(user_message):
     if not client:
         return "⚠️ API key not set."
 
-    uploaded_doc = st.session_state.get("pdf_file")
+    prompt = f"""
+You are a university student help desk assistant.
 
-    contents = [user_message]
+Your job is to help students with:
+- exams
+- courses
+- assignments
+- fees
+- university services
 
-    if uploaded_doc:
-        contents = [uploaded_doc, user_message]
+Rules:
+- Answer clearly and professionally
+- Use bullet points when helpful
+- Keep answers simple and structured
+- If question is unclear, ask a follow-up question
+- Be friendly and helpful
+
+Student question:
+{user_message}
+"""
 
     try:
         response = client.models.generate_content(
             model=DEFAULT_MODEL,
-            contents=contents,
+            contents=prompt,
             config=types.GenerateContentConfig(temperature=0.7),
         )
         return response.text
@@ -144,7 +158,14 @@ with st.sidebar:
         <small>Student chatbot</small>
     </div>
     """, unsafe_allow_html=True)
+    
 
+    st.info(f"💬 Chats: {len(st.session_state.messages)}")
+
+    if st.session_state.pdf_file:
+        st.success("📄 PDF loaded")
+
+    # existing upload
     uploaded_file = st.file_uploader("📄 Upload PDF", type=["pdf"])
 
     if uploaded_file:
@@ -153,9 +174,7 @@ with st.sidebar:
                 gemini_file = upload_pdf_to_gemini(uploaded_file)
                 if gemini_file:
                     st.session_state.pdf_file = gemini_file
-                    st.success("PDF ready for questions ✅")
-                else:
-                    st.error("Upload failed ❌")
+                    st.success("PDF ready ✅")
 
     if st.session_state.pdf_file:
         st.info("📄 PDF attached")
