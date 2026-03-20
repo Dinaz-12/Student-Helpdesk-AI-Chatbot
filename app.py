@@ -185,6 +185,19 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # -----------------------------
+# EMPTY STATE (ADD HERE 🔥)
+# -----------------------------
+if len(st.session_state.messages) == 0:
+    st.markdown("""
+    <div style="text-align:center; margin-top:40px; opacity:0.7;">
+        <h4>Try asking:</h4>
+        <p>• Exam timetable</p>
+        <p>• Assignment deadlines</p>
+        <p>• Course details</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
 # CHAT DISPLAY
 # -----------------------------
 for msg in st.session_state.messages:
