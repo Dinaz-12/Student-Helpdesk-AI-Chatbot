@@ -172,12 +172,10 @@ with st.sidebar:
     uploaded_file = st.file_uploader("📄 Upload PDF", type=["pdf"])
 
     if uploaded_file:
-
-            # Use PDF with AI
-    if uploaded_file:
-        if st.button("📄 Use PDF with AI", use_container_width=True):
+        if st.button("Use PDF", use_container_width=True):
             with st.spinner("Uploading PDF..."):
                 gemini_file = upload_pdf_to_gemini(uploaded_file)
+
                 if gemini_file:
                     st.session_state.pdf_file = gemini_file
                     st.success("PDF ready ✅")
