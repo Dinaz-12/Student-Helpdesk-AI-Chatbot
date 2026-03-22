@@ -69,7 +69,7 @@ button[kind="secondary"] {{
 # GEMINI
 # -----------------------------
 GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
-DEFAULT_MODEL = "gemini-1.5-flash-latest"
+DEFAULT_MODEL = "gemini-1.5-flash"
 
 client = None
 if GEMINI_API_KEY:
