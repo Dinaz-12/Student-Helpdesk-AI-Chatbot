@@ -1,6 +1,6 @@
 import tempfile
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 from google.genai import types
 import PyPDF2
 
@@ -150,6 +150,9 @@ Answer:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "pdf_text" not in st.session_state:
+    st.session_state.pdf_text = ""
+
 if "pdf_file" not in st.session_state:
     st.session_state.pdf_file = None
 
@@ -171,32 +174,55 @@ with st.sidebar:
         <small>Student chatbot</small>
     </div>
     """, unsafe_allow_html=True)
-    
 
     st.info(f"💬 Chats: {len(st.session_state.messages)}")
 
+    # -----------------------------
+    # 📄 PDF STATUS
+    # -----------------------------
     if st.session_state.pdf_file:
-        st.success("📄 PDF loaded")
+        st.success("📄 Gemini PDF loaded")
 
-    # existing upload
+    if st.session_state.pdf_text:
+        st.success("📄 Text PDF loaded")
+
+    # -----------------------------
+    # 📄 UPLOAD
+    # -----------------------------
     uploaded_file = st.file_uploader("📄 Upload PDF", type=["pdf"])
 
     if uploaded_file:
-        if st.button("Use PDF", use_container_width=True):
-            with st.spinner("Uploading PDF..."):
-                gemini_file = upload_pdf_to_gemini(uploaded_file)
-                if gemini_file:
-                    st.session_state.pdf_file = gemini_file
-                    st.success("PDF ready ✅")
 
-    if st.session_state.pdf_file:
-        st.info("📄 PDF attached")
+        # 🔥 SIMPLE TEXT EXTRACT (NEW)
+        pdf_text = extract_pdf_text(uploaded_file)
+        st.session_state.pdf_text = pdf_text
+        st.success("PDF text extracted ✅")
 
-    if st.button("🗑 Clear Chat", use_container_width=True):
-        st.session_state.messages = []
+# 🔥 GEMINI UPLOAD (OLD)
+if st.button("Use PDF with AI", use_container_width=True):
+    with st.spinner("Uploading PDF..."):
+        gemini_file = upload_pdf_to_gemini(uploaded_file)
+            if gemini_file:
+                st.session_state.pdf_file = gemini_file
+                st.success("Gemini PDF ready ✅")
+
+# -----------------------------
+# REMOVE PDF
+# -----------------------------
+if st.session_state.pdf_file or st.session_state.pdf_text:
+    if st.button("❌ Remove PDF"):
         st.session_state.pdf_file = None
+        st.session_state.pdf_text = ""
         st.rerun()
 
+# -----------------------------
+# CLEAR CHAT
+# -----------------------------
+if st.button("🗑 Clear Chat", use_container_width=True):
+    st.session_state.messages = []
+    st.session_state.pdf_file = None
+    st.session_state.pdf_text = ""
+    st.rerun()
 # -----------------------------
 # HEADER
 # -----------------------------
