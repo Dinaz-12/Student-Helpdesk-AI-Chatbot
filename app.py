@@ -204,7 +204,7 @@ if st.button("Use PDF with AI", use_container_width=True):
         gemini_file = upload_pdf_to_gemini(uploaded_file)
             if gemini_file:
                 st.session_state.pdf_file = gemini_file
-                st.success("Gemini PDF ready ✅")
+                st.success("PDF ready ✅")
 
 # -----------------------------
 # REMOVE PDF
