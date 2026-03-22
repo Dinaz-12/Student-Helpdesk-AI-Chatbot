@@ -155,6 +155,23 @@ with st.sidebar:
 
     st.info(f"💬 Chats: {len(st.session_state.messages)}")
 
+    # Use PDF with AI
+    if uploaded_file:
+        if st.button("📄 Use PDF with AI", use_container_width=True):
+            with st.spinner("Uploading PDF..."):
+                gemini_file = upload_pdf_to_gemini(uploaded_file)
+                if gemini_file:
+                    st.session_state.pdf_file = gemini_file
+                    st.success("PDF ready ✅")
+
+    # Clear Chat
+    if st.button("🗑 Clear Chat", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.pdf_file = None
+        st.session_state.pdf_text = ""
+        st.rerun()
+        
+
     # -----------------------------
     # 📄 PDF STATUS
     # -----------------------------
@@ -176,22 +193,7 @@ with st.sidebar:
         st.session_state.pdf_text = pdf_text
         st.success("PDF text extracted ✅")
 
-# 🔥 GEMINI UPLOAD (OLD)
-if st.button("Use PDF with AI", use_container_width=True):
-    with st.spinner("Uploading PDF..."):
-        gemini_file = upload_pdf_to_gemini(uploaded_file)
-        if gemini_file:   # ✅ correct indentation
-            st.session_state.pdf_file = gemini_file
-            st.success("PDF ready ✅")
 
-# -----------------------------
-# REMOVE PDF
-# -----------------------------
-if st.session_state.pdf_file or st.session_state.pdf_text:
-    if st.button("❌ Remove PDF"):
-        st.session_state.pdf_file = None
-        st.session_state.pdf_text = ""
-        st.rerun()
 
 # -----------------------------
 # CLEAR CHAT
