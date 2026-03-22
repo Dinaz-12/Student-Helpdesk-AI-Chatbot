@@ -69,7 +69,7 @@ button[kind="secondary"] {{
 # GEMINI
 # -----------------------------
 GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
-DEFAULT_MODEL = "gemini-1.5-flash"
+DEFAULT_MODEL = "gemini-1.0-pro"
 
 client = None
 if GEMINI_API_KEY:
@@ -113,7 +113,7 @@ def generate_response(user_message):
         return "⚠️ API key not set."
 
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-1.0-pro")
 
         response = model.generate_content(user_message)
 
