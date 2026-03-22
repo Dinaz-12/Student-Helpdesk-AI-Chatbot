@@ -69,7 +69,7 @@ button[kind="secondary"] {{
 # GEMINI
 # -----------------------------
 GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-1.5-flash"
 
 client = None
 if GEMINI_API_KEY:
@@ -107,20 +107,35 @@ def upload_pdf_to_gemini(uploaded_file):
 # RESPONSE FUNCTION
 # -----------------------------
 def generate_response(user_message):
-    if not GEMINI_API_KEY:
+    if not client:
         return "⚠️ API key not set."
 
+    prompt = f"""
+You are a helpful student assistant.
+
+User: {user_message}
+"""
+
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
-
-        response = model.generate_content(
-            f"You are a helpful student assistant.\nUser: {user_message}"
+        # 🔥 First try (fast & free)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt
         )
-
         return response.text
 
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        try:
+            # 🔁 Fallback model
+            response = client.models.generate_content(
+                model="gemini-1.5-pro",
+                contents=prompt
+            )
+            return response.text
+        except:
+            if "429" in str(e):
+                return "⚠️ Too many requests. Please wait and try again."
+            return "❌ Error generating response"
 
 # -----------------------------
 # SESSION
