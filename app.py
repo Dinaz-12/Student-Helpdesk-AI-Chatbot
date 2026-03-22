@@ -69,13 +69,13 @@ button[kind="secondary"] {{
 # GEMINI
 # -----------------------------
 GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
-DEFAULT_MODEL = "gemini-1.0-pro"
+DEFAULT_MODEL = "gemini-1.5-flash-latest"
 
 client = None
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
-    st.write("API:", GEMINI_API_KEY)
+
 
 # -----------------------------
 def extract_pdf_text(uploaded_file):
@@ -113,7 +113,7 @@ def generate_response(user_message):
         return "⚠️ API key not set."
 
     try:
-        model = genai.GenerativeModel("gemini-1.0-pro")
+        model = genai.GenerativeModel(DEFAULT_MODEL)
 
         response = model.generate_content(user_message)
 
