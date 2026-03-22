@@ -202,9 +202,9 @@ with st.sidebar:
 if st.button("Use PDF with AI", use_container_width=True):
     with st.spinner("Uploading PDF..."):
         gemini_file = upload_pdf_to_gemini(uploaded_file)
-            if gemini_file:
-                st.session_state.pdf_file = gemini_file
-                st.success("PDF ready ✅")
+        if gemini_file:   # ✅ correct indentation
+            st.session_state.pdf_file = gemini_file
+            st.success("PDF ready ✅")
 
 # -----------------------------
 # REMOVE PDF
