@@ -89,7 +89,7 @@ def extract_pdf_text(uploaded_file):
 # PDF UPLOAD FUNCTION
 # -----------------------------
 def upload_pdf_to_gemini(uploaded_file):
-    if not client or uploaded_file is None:
+    if uploaded_file is None:
         return None
 
     try:
@@ -112,7 +112,7 @@ def generate_response(user_message):
 
     genai.configure(api_key=GEMINI_API_KEY)
 
-    model = genai.GenerativeModel("gemini-1.5-flash-latest")
+    model = genai.GenerativeModel("gemini-pro")
 
     system_prompt = """
 You are a university student help desk assistant.
