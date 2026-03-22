@@ -73,7 +73,7 @@ DEFAULT_MODEL = "gemini-1.5-flash"
 
 client = None
 if GEMINI_API_KEY:
-    client = genai.Client(api_key=GEMINI_API_KEY)
+    genai.configure(api_key=GEMINI_API_KEY)
 
     st.write("API:", GEMINI_API_KEY)
 
@@ -109,35 +109,20 @@ def upload_pdf_to_gemini(uploaded_file):
 # RESPONSE FUNCTION
 # -----------------------------
 def generate_response(user_message):
-    if not client:
+    if not GEMINI_API_KEY:
         return "⚠️ API key not set."
 
-    prompt = f"""
-You are a helpful student assistant.
-
-User: {user_message}
-"""
-
     try:
-        # 🔥 First try (fast & free)
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=prompt
-        )
+        model = genai.GenerativeModel("gemini-1.5-flash")
+
+        response = model.generate_content(user_message)
+
         return response.text
 
     except Exception as e:
-        try:
-            # 🔁 Fallback model
-            response = client.models.generate_content(
-                model="gemini-1.5-pro",
-                contents=prompt
-            )
-            return response.text
-        except:
-            if "429" in str(e):
-                return "⚠️ Too many requests. Please wait and try again."
-            return "❌ Error generating response"
+        if "429" in str(e):
+            return "⚠️ Too many requests. Please wait and try again."
+        return f"❌ Error: {str(e)}"
 
 # -----------------------------
 # SESSION
