@@ -1,7 +1,6 @@
 import tempfile
 import streamlit as st
 import google.generativeai as genai
-from google.genai import types
 import PyPDF2
 
 # -----------------------------
@@ -108,37 +107,22 @@ def upload_pdf_to_gemini(uploaded_file):
 # RESPONSE FUNCTION
 # -----------------------------
 def generate_response(user_message):
-    if not client:
+    if not GEMINI_API_KEY:
         return "⚠️ API key not set."
 
-    # ✅ ADD THIS HERE
+    genai.configure(api_key=GEMINI_API_KEY)
+
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
     system_prompt = """
 You are a university student help desk assistant.
-
-Give:
-- Short answers
-- Clear steps
-- Practical guidance
-
-If question is about exams, courses, or assignments:
-→ Give direct actionable steps
-
-Do NOT give long explanations.
-"""
-
-    prompt = f"""
-{system_prompt}
-
-User: {user_message}
-
-Answer:
+Give short, clear, practical answers.
 """
 
     try:
-        response = client.models.generate_content(
-            model=DEFAULT_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(temperature=0.5),
+        response = model.generate_content(
+            f"{system_prompt}\nUser: {user_message}",
+            generation_config={"temperature": 0.5}
         )
         return response.text
     except Exception as e:
