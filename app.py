@@ -110,21 +110,15 @@ def generate_response(user_message):
     if not GEMINI_API_KEY:
         return "⚠️ API key not set."
 
-    genai.configure(api_key=GEMINI_API_KEY)
-
-    model = genai.GenerativeModel("gemini-pro")
-
-    system_prompt = """
-You are a university student help desk assistant.
-Give short, clear, practical answers.
-"""
-
     try:
+        model = genai.GenerativeModel("gemini-2.0-flash")
+
         response = model.generate_content(
-            f"{system_prompt}\nUser: {user_message}",
-            generation_config={"temperature": 0.5}
+            f"You are a helpful student assistant.\nUser: {user_message}"
         )
+
         return response.text
+
     except Exception as e:
         return f"❌ Error: {str(e)}"
 
