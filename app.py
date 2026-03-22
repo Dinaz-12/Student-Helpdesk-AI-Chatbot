@@ -73,7 +73,9 @@ DEFAULT_MODEL = "gemini-1.5-flash"
 
 client = None
 if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+    client = genai.Client(api_key=GEMINI_API_KEY)
+
+    st.write("API:", GEMINI_API_KEY)
 
 # -----------------------------
 def extract_pdf_text(uploaded_file):
