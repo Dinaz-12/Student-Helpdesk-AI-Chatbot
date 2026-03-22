@@ -195,14 +195,7 @@ with st.sidebar:
 
 
 
-# -----------------------------
-# CLEAR CHAT
-# -----------------------------
-if st.button("🗑 Clear Chat", use_container_width=True):
-    st.session_state.messages = []
-    st.session_state.pdf_file = None
-    st.session_state.pdf_text = ""
-    st.rerun()
+
 # -----------------------------
 # HEADER
 # -----------------------------
