@@ -112,7 +112,7 @@ def generate_response(user_message):
 
     genai.configure(api_key=GEMINI_API_KEY)
 
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
     system_prompt = """
 You are a university student help desk assistant.
